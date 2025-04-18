@@ -1,3 +1,17 @@
+// Debugging inicial
+console.log("Main.js cargado correctamente");
+
+// Función para esperar a MathJax
+function waitForMathJax() {
+  return new Promise((resolve) => {
+    if (window.MathJax) {
+      MathJax.startup.promise.then(resolve);
+    } else {
+      setTimeout(() => waitForMathJax().then(resolve), 100);
+    }
+  });
+}
+
 const TOLERANCE = 1e-5;
 const TEST_POINTS = [0, 0.1, 0.5, 1, Math.PI/4];
 
