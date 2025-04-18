@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen ED Lineales</title>
+  <link rel="stylesheet" href="/curso/css/estilo.css">
+  <!-- Usar CDN completo para MathJax -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    /* Estilos temporales para debug */
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .debug { border: 1px solid red; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <div id="debug-info" class="debug">
+    Cargando examen... (Si no ves nada, revisa la consola F12)
+  </div>
+  <div id="quiz-container"></div>
+
+  <script type="module">
+    // Debug inicial
+    console.log("Iniciando carga del examen...");
+    
+    try {
+      // Importar con rutas absolutas para GitHub Pages
+      const moduleBase = '/curso/js';
+      const [mainModule, configModule] = await Promise.all([
+        import(`${moduleBase}/main.js`),
+        import(`${moduleBase}/config/config1.js`)
+      ]);
+      
+      console.log("Módulos cargados:", mainModule, configModule);
+      
+      const examen = new mainModule.default(configModule.default);
+      examen.init();
+      
+      // Ocultar debug después de 3 segundos
+      setTimeout(() => {
+        document.getElementById('debug-info').style.display = 'none';
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Error fatal:", error);
+      document.getElementById('debug-info').innerHTML = `
+        <strong>Error al cargar el examen:</strong> ${error.message}
+        <br>Revisa la consola (F12) para más detalles.
+      `;
+    }
+  </script>
+</body>
+</html>
