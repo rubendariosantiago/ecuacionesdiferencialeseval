@@ -1,1 +1,21 @@
-.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title id="exam-title">Examen ED</title>
+  <link rel="stylesheet" href="../css/estilo.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div id="quiz-container"></div>
+  <script type="module">
+    import { EXAM_CONFIG } from '../js/config/config1.js';
+    import EDExamen from '../js/main.js';
+    
+    const examen = new EDExamen(EXAM_CONFIG);
+    examen.init();
+  </script>
+</body>
+</html>
