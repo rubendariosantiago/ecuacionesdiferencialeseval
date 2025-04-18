@@ -130,3 +130,5 @@ const QUESTION_BANK = [
     conditions: []
   }
 ];
+
+export default QUESTION_BANK;
