@@ -1,3 +1,16 @@
+const TOLERANCE = 1e-5;
+const TEST_POINTS = [0, 0.1, 0.5, 1, Math.PI/4];
+
+function evaluateWithDiagnostic(expr, scope) {
+  try {
+    const parsedExpr = parseExpression(expr);
+    const evalFn = new Function(...Object.keys(scope), 
+      `'use strict'; try { return ${parsedExpr}; } catch(e) { return NaN; }`);
+    return evalFn(...Object.values(scope));
+  } catch (e) {
+    throw new Error(`Error de evaluación: ${e.message}`);
+  }
+}
 // ===================== CLASE PRINCIPAL =====================
 class EDExamen {
   constructor(config) {
