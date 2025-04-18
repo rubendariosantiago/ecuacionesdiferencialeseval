@@ -1,4 +1,4 @@
-import QUESTION_BANK from './preguntas/preguntas1.js';
+import QUESTION_BANK from '../preguntas/preguntas1.js';
 
 export default {
   title: "Examen Básico de ED Lineales",
