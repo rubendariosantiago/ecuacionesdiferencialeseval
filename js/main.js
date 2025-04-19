@@ -40,7 +40,7 @@ class EDExamen {
               if (!module.default) {
                 throw new Error(`El banco ${bank} no exporta por defecto`);
               }
-              return module.default //;
+              return module.default ;
             })
             .catch(err => {
               console.error(`Error cargando ${bank}:`, err);
