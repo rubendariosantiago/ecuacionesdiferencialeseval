@@ -176,22 +176,31 @@ selectQuestions() {
     }
   }
 
-  renderTheoryQuestion(question, index) {
-    const options = question.options.map((opt, i) => `
-      <label><p>
-        <input type="radio" name="theory-${index}" value="${i}">
-        ${opt}</p>
-      </label>
-    `).join('');
+renderTheoryQuestion(question, index) {
+  // Mezclar las opciones aleatoriamente
+  const shuffledOptions = [...question.options]
+    .map((value, index) => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
 
-    return `
-      <div class="question theory-question" data-index="${index}">
-        <p><strong>Pregunta teórica ${index + 1}:</strong> ${question.question}</p>
-        ${options}
-        <div class="feedback hidden"></div>
-      </div>
-    `;
-  }
+  // Encontrar la nueva posición de la respuesta correcta
+  const correctIndex = shuffledOptions.indexOf(question.options[question.answer]);
+
+  const optionsHtml = shuffledOptions.map((opt, i) => `
+    <label>
+      <input type="radio" name="theory-${index}" value="${i}">
+      ${opt}
+    </label>
+  `).join('');
+
+  return `
+    <div class="question theory-question" data-index="${index}">
+      <p><strong>Pregunta teórica ${index + 1}:</strong> ${question.question}</p>
+      ${optionsHtml}
+      <div class="feedback hidden"></div>
+    </div>
+  `;
+}
 
   renderPracticalQuestion(question, index) {
     const paramsInfo = Object.entries(question.params || {})
