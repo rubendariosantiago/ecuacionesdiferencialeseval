@@ -12,11 +12,11 @@ export default {
   questionMix: {
     theory: {
       count: 3,
-      tags: ["Factor-integrante", "Lineal-primer-orden"]
+      tags: ["factor-integrante", "lineal-primer-orden"]
     },
     practical: {
       count: 2,
-      types: ["Lineales-primer-orden"],
+      types: ["lineales-primer-orden"],
       difficulty: "medium"
     }
   },
