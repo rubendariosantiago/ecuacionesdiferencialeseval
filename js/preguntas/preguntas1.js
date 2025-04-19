@@ -14,7 +14,7 @@ const QUESTION_BANK = [
     solution: "El factor integrante se define como $$ \\mu(x) = e^{\\int P(x)dx}.$$  La ecuación diferencial original se transforma en exacta al multiplicarla por el factor integrante."
   },
     {
-    id: "T1",
+    id: "T2",
     type: "theory",
     tags: ["Factor-integrante"],
     question: "Determina el factor integrante de la ecuación diferencial lineal $$ y' + 2xy = 4x^3 $$",
@@ -28,7 +28,7 @@ const QUESTION_BANK = [
     solution: "El factor integrante es $$ \\mu(x) = e^{\\int P(x)dx}=  e^{\\int 2xdx}=  e^{x^2}.$$  La ecuación diferencial original se transforma en exacta al multiplicarla por el factor integrante."
   },
   {
-    id: "T1",
+    id: "T3",
     type: "theory",
     tags: ["Lineal-primer-orden"],  
     question: "La solución general de $$\\displaystyle{ \\frac{dy}{dx}  - 3y = 0  } $$ es:",
@@ -42,7 +42,7 @@ const QUESTION_BANK = [
     solution: "La ecuación diferencial es separable: $$ \\frac{dy}{y} = 3dx \\Longrightarrow \\ln|y| = 3x + C \\Longrightarrow y = Ce^{3x} $$"
   },
     {
-    id: "T1",
+    id: "T4",
     type: "theory",
     tags: ["Lineal-primer-orden"],  
     question: "Determina la ecuación diferencial de primer orden que es lineal",
@@ -56,7 +56,7 @@ const QUESTION_BANK = [
     solution: "La forma de una ecuación diferencial lineal de primer orden es:  \\[ \\frac{dy}{dx}+P(x)y=Q(x)  \\]"
   },
 {
-    id: "T1",
+    id: "T5",
     type: "theory",
     tags: ["Lineal-primer-orden"],  
     question: "La solución general de \\(\\displaystyle{ \\frac{dy}{dx}  +4y = 0  } \\) es:",
@@ -101,7 +101,7 @@ const QUESTION_BANK = [
     conditions: ["a != 0"]
   },
   {
-    id: "P1",
+    id: "P2",
     type: "practical",
     tags: ["Lineales-primer-orden"],
     difficulty: "medium",
@@ -109,7 +109,7 @@ const QUESTION_BANK = [
     solution_mathjs: "({{a}}*{{b}}*cos({{c}}*x)+{{b}}*{{c}}*sin({{c}}*x))/({{a*a}}+{{c*c}})+({{d}}-({{a}}*{{b}})/({{a*a}}+{{c*c}}))*exp(-{{a}}*x)",
     solution_latex: "$$\\frac{ {{a}}{{b}} \\cos({{c}}x) + {{b}}{{c}} \\sin({{c}}x) }{ {{a}}^2 + {{c}}^2 } + \\left( {{d}} - \\frac{ {{a}}{{b}} }{ {{a}}^2 + {{c}}^2 } \\right) e^{-{{a}}x}$$",
     steps: [
-      "Primmero se identifica la ecuación diferencial lineal de primer orden: \\[ y' + {{a}}y = {{b}}\\cos({{c}}x) \\]",
+      "Primero se identifica la ecuación diferencial lineal de primer orden: \\[ y' + {{a}}y = {{b}}\\cos({{c}}x) \\]",
       "La solución homogénea es: $$ y_h = Ce^{-{{a}}x} $$",
       "Para continuar, se propone una solución particular por coeficientes indeterminados:",
       "En este caso se propone: $$ y_p = A\\cos({{c}}x) + B\\sin({{c}}x) $$",
