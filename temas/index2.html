@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Examen ED</title>
   <!-- Usa rutas relativas en lugar de absolutas -->
-  <link rel="stylesheet" href="../css/estilo.css">
+  <link rel="stylesheet" href="/ecuacionesdiferencialeseval/css/estilo.css">
   <!-- Usa CDNs confiables alternativos -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -28,8 +28,8 @@
     
     try {
       // Usa rutas relativas para los imports
-      const examenModule = await import('../js/main.js');
-      const configModule = await import('../js/config/config2.js');
+      const examenModule = await import('/ecuacionesdiferencialeseval/js/main.js');
+      const configModule = await import('/ecuacionesdiferencialeseval/js/config/config1.js');
       
       if (!examenModule.default || !configModule.default) {
         throw new Error("Error en los módulos importados");
