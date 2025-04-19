@@ -35,7 +35,7 @@ class EDExamen {
     } else if (this.config.questionBanks) {
       const loadedBanks = await Promise.all(
         this.config.questionBanks.map(bank => 
-          import(`./preguntas/${bank}.js`)
+          import(`/ecuacionesdiferencialeseval/js/preguntas/${bank}.js`)
             .then(module => {
               if (!module.default) {
                 throw new Error(`El banco ${bank} no exporta por defecto`);
