@@ -177,19 +177,22 @@ selectQuestions() {
   }
 
 renderTheoryQuestion(question, index) {
-  // Mezclar las opciones aleatoriamente
-  const shuffledOptions = [...question.options]
-    .map((value, index) => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value);
+  // Mezclar opciones y guardar el mapeo correcto
+  const optionsWithIndex = question.options.map((opt, i) => ({ opt, originalIndex: i }));
+  const shuffledOptions = [...optionsWithIndex].sort(() => Math.random() - 0.5);
+  
+  // Encontrar el índice correcto en las opciones mezcladas
+  const correctShuffledIndex = shuffledOptions.findIndex(
+    item => item.originalIndex === question.answer
+  );
 
-  // Encontrar la nueva posición de la respuesta correcta
-  const correctIndex = shuffledOptions.indexOf(question.options[question.answer]);
+  // Guardar el índice correcto para la evaluación
+  this.questions[index].shuffledAnswer = correctShuffledIndex;
 
-  const optionsHtml = shuffledOptions.map((opt, i) => `
+  const optionsHtml = shuffledOptions.map((item, i) => `
     <label>
       <input type="radio" name="theory-${index}" value="${i}">
-      ${opt}
+      ${item.opt}
     </label>
   `).join('');
 
@@ -228,13 +231,20 @@ renderTheoryQuestion(question, index) {
     const results = [];
 
     this.questions.forEach((q, i) => {
-      const questionEl = document.querySelector(`.question[data-index="${i}"]`);
-      const feedbackEl = questionEl.querySelector('.feedback');
+     // const questionEl = document.querySelector(`.question[data-index="${i}"]`);
+   //   const feedbackEl = questionEl.querySelector('.feedback');
       
-      if (q.type === 'theory') {
-        const selected = questionEl.querySelector(`input[name="theory-${i}"]:checked`);
-        const isCorrect = selected && parseInt(selected.value) === q.answer;
-        
+   //   if (q.type === 'theory') {
+   //     const selected = questionEl.querySelector(`input[name="theory-${i}"]:checked`);
+   //     const isCorrect = selected && parseInt(selected.value) === q.answer;
+     this.questions.forEach((q, i) => {
+    if (q.type === 'theory') {
+      const questionEl = document.querySelector(`.question[data-index="${i}"]`);
+      const selected = questionEl.querySelector(`input[name="theory-${i}"]:checked`);
+      
+      // Usar shuffledAnswer en lugar de answer
+      const isCorrect = selected && parseInt(selected.value) === q.shuffledAnswer;
+     
         if (isCorrect) {
           this.score++;
           feedbackEl.innerHTML = '✅ Correcto!';
