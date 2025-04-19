@@ -2,7 +2,7 @@ const QUESTION_BANK = [
 {
     id: "T1",
     type: "theory",
-    tags: ["factor-integrante"],
+    tags: ["Factor-integrante"],
     question: "Determina el factor integrante de la ecuación diferencial lineal $$ y' + P(x)y = Q(x) $$",
     options: [
       "\\( e^{\\int P(x)dx} \\)",
@@ -16,7 +16,7 @@ const QUESTION_BANK = [
     {
     id: "T1",
     type: "theory",
-    tags: ["factor-integrante"],
+    tags: ["Factor-integrante"],
     question: "Determina el factor integrante de la ecuación diferencial lineal $$ y' + 2xy = 4x^3 $$",
     options: [
       "\\( \\mu(x)= e^{x^2} \\)",
@@ -71,8 +71,8 @@ const QUESTION_BANK = [
   },
 {
     id: "P1",
-    type: "practical",
-    tags: ["lineales-primer-orden"],
+    type: "practice",
+    tags: ["Lineales-primer-orden"],
     difficulty: "medium",
     template: "Resuelve: \\[ y' + {{a}}y = {{b}} \\] con \\( y(0) = {{c}} \\)",
     solution_mathjs: "({{b}}/{{a}})+({{c}}-({{b}}/{{a}}))*exp(-{{a}}*x)",
@@ -102,8 +102,8 @@ const QUESTION_BANK = [
   },
   {
     id: "P1",
-    type: "practical",
-    tags: ["lineales-primer-orden"],
+    type: "practice",
+    tags: ["Lineales-primer-orden"],
     difficulty: "medium",
     template: "Resuelve v: $$ y' + {{a}}y = {{b}} \\cos({{c}}x) $$ con \\( y(0) = {{d}} \\)",
     solution_mathjs: "({{a}}*{{b}}*cos({{c}}*x)+{{b}}*{{c}}*sin({{c}}*x))/({{a*a}}+{{c*c}})+({{d}}-({{a}}*{{b}})/({{a*a}}+{{c*c}}))*exp(-{{a}}*x)",
