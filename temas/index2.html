@@ -3,20 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Examen ED</title>
-  <!-- Usa rutas relativas en lugar de absolutas -->
+  <base href="/ecuacionesdiferencialeseval/">
   <link rel="stylesheet" href="/ecuacionesdiferencialeseval/css/estilo.css">
-  <!-- Usa CDNs confiables alternativos -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <style>
-    .error {
-      color: #d32f2f;
-      background: #ffebee;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px;
-    }
-  </style>
 </head>
 <body>
   <div id="quiz-container">
@@ -27,26 +17,25 @@
     console.log("Iniciando carga del examen...");
     
     try {
-      // Usa rutas relativas para los imports
+      // Importación con manejo de errores
       const examenModule = await import('/ecuacionesdiferencialeseval/js/main.js');
-      const configModule = await import('/ecuacionesdiferencialeseval/js/config/config1.js');
+      const configModule = await import('/ecuacionesdiferencialeseval/js/config/config2.js');
       
+      // Verificación de módulos
       if (!examenModule.default || !configModule.default) {
-        throw new Error("Error en los módulos importados");
+        throw new Error("Los módulos no se cargaron correctamente");
       }
-      
-      console.log("Módulos cargados correctamente");
-      const examen = new examenModule.default(configModule.default);
-      examen.init();
+
+      // Inicialización sin punto y coma duplicado
+      const examen = new examenModule.default(configModule.default)
+      examen.init()
       
     } catch (error) {
-      console.error("Error fatal:", error);
+      console.error("Error:", error);
       document.getElementById('quiz-container').innerHTML = `
         <div class="error">
-          <h2>Error al cargar el examen</h2>
+          <h3>Error al cargar el examen</h3>
           <p>${error.message}</p>
-          <p>Detalles técnicos:</p>
-          <pre>${error.stack}</pre>
           <button onclick="window.location.reload()">Reintentar</button>
         </div>
       `;
