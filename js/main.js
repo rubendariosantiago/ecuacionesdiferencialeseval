@@ -87,31 +87,35 @@ class EDExamen {
     this.renderExam();
   }
 
-  selectQuestions() {
-    const { theory = {}, practical = {} } = this.config.questionMix || {};
-    const selected = [];
+selectQuestions() {
+  const { theory = {}, practical = {} } = this.config.questionMix || {};
+  const selected = [];
 
-    // Seleccionar preguntas teóricas
-    if (theory.count > 0) {
-      const theoryQuestions = this.questionBank.filter(
-        q => q.type === 'theory' && 
-             (!theory.tags || q.tags?.some(tag => theory.tags.includes(tag)))
-      );
-      selected.push(...this.getRandomElements(theoryQuestions, theory.count));
-    }
-
-    // Seleccionar preguntas prácticas
-    if (practical.count > 0) {
-      const practicalQuestions = this.questionBank.filter(
-        q => q.type === 'practical' && 
-             (!practical.types || q.types?.some(type => practical.types.includes(type))) &&
-             (!practical.difficulty || q.difficulty === practical.difficulty)
-      );
-      selected.push(...this.getRandomElements(practicalQuestions, practical.count));
-    }
-
-    return selected;
+  // Selección de preguntas teóricas
+  if (theory.count > 0) {
+    const theoryQuestions = this.questionBank.filter(
+      q => q.type === 'theory' && 
+           (!theory.tags || q.tags?.some(tag => theory.tags.includes(tag)))
+    );
+    selected.push(...this.getRandomElements(theoryQuestions, theory.count));
   }
+
+  // Selección de preguntas prácticas (parte crítica)
+  if (practical.count > 0) {
+    const practicalQuestions = this.questionBank.filter(
+      q => q.type === 'practical' &&
+           (!practical.types || q.types?.some(type => practical.types.includes(type))) &&
+           (!practical.difficulty || q.difficulty === practical.difficulty)
+    );
+    
+    console.log("Preguntas prácticas disponibles:", practicalQuestions); // Debug
+    
+    selected.push(...this.getRandomElements(practicalQuestions, practical.count));
+  }
+
+  console.log("Preguntas seleccionadas:", selected); // Debug
+  return selected;
+}
 
   processQuestions(questions) {
     return questions.map((q, index) => {
