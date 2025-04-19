@@ -2,7 +2,7 @@ const QUESTION_BANK = [
 {
     id: "T1",
     type: "theory",
-    tags: ["Factor-integrante"],
+    tags: ["factor-integrante"],
     question: "Determina el factor integrante de la ecuación diferencial lineal $$ y' + P(x)y = Q(x) $$",
     options: [
       "\\( e^{\\int P(x)dx} \\)",
@@ -16,7 +16,7 @@ const QUESTION_BANK = [
     {
     id: "T2",
     type: "theory",
-    tags: ["Factor-integrante"],
+    tags: ["factor-integrante"],
     question: "Determina el factor integrante de la ecuación diferencial lineal $$ y' + 2xy = 4x^3 $$",
     options: [
       "\\( \\mu(x)= e^{x^2} \\)",
@@ -30,7 +30,7 @@ const QUESTION_BANK = [
   {
     id: "T3",
     type: "theory",
-    tags: ["Lineal-primer-orden"],  
+    tags: ["lineal-primer-orden"],  
     question: "La solución general de $$\\displaystyle{ \\frac{dy}{dx}  - 3y = 0  } $$ es:",
     options: [
       "\\( y = Ce^{3x} \\)",
@@ -44,7 +44,7 @@ const QUESTION_BANK = [
     {
     id: "T4",
     type: "theory",
-    tags: ["Lineal-primer-orden"],  
+    tags: ["lineal-primer-orden"],  
     question: "Determina la ecuación diferencial de primer orden que es lineal",
     options: [
       "\\( \\displaystyle{ y\\frac{dy}{dx} + 2y = e^{3x} }\\)",
@@ -58,7 +58,7 @@ const QUESTION_BANK = [
 {
     id: "T5",
     type: "theory",
-    tags: ["Lineal-primer-orden"],  
+    tags: ["lineal-primer-orden"],  
     question: "La solución general de \\(\\displaystyle{ \\frac{dy}{dx}  +4y = 0  } \\) es:",
     options: [
       "\\( y = Ce^{-4x} \\)",
@@ -72,7 +72,8 @@ const QUESTION_BANK = [
 {
     id: "P1",
     type: "practical",
-    tags: ["Lineales-primer-orden"],
+    tags: ["lineales-primer-orden"],
+    types: ["lineales-primer-orden"], // Nuevo campo requerido
     difficulty: "medium",
     template: "Resuelve: \\[ y' + {{a}}y = {{b}} \\] con \\( y(0) = {{c}} \\)",
     solution_mathjs: "({{b}}/{{a}})+({{c}}-({{b}}/{{a}}))*exp(-{{a}}*x)",
@@ -104,6 +105,7 @@ const QUESTION_BANK = [
     id: "P2",
     type: "practical",
     tags: ["Lineales-primer-orden"],
+    types: ["lineales-primer-orden"], // Nuevo campo requerido
     difficulty: "medium",
     template: "Resuelve v: $$ y' + {{a}}y = {{b}} \\cos({{c}}x) $$ con \\( y(0) = {{d}} \\)",
     solution_mathjs: "({{a}}*{{b}}*cos({{c}}*x)+{{b}}*{{c}}*sin({{c}}*x))/({{a*a}}+{{c*c}})+({{d}}-({{a}}*{{b}})/({{a*a}}+{{c*c}}))*exp(-{{a}}*x)",
