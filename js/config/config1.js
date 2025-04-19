@@ -14,7 +14,7 @@ export default {
       count: 3,
       tags: ["Factor-integrante", "Lineal-primer-orden"]
     },
-    practice: {
+    practical: {
       count: 2,
       types: ["Lineales-primer-orden"],
       difficulty: "medium"
