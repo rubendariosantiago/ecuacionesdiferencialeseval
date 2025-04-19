@@ -71,7 +71,7 @@ const QUESTION_BANK = [
   },
 {
     id: "P1",
-    type: "practice",
+    type: "practical",
     tags: ["Lineales-primer-orden"],
     difficulty: "medium",
     template: "Resuelve: \\[ y' + {{a}}y = {{b}} \\] con \\( y(0) = {{c}} \\)",
@@ -102,7 +102,7 @@ const QUESTION_BANK = [
   },
   {
     id: "P1",
-    type: "practice",
+    type: "practical",
     tags: ["Lineales-primer-orden"],
     difficulty: "medium",
     template: "Resuelve v: $$ y' + {{a}}y = {{b}} \\cos({{c}}x) $$ con \\( y(0) = {{d}} \\)",
