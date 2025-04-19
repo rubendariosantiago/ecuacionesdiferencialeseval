@@ -162,22 +162,38 @@ class EDExamen {
   return selected;
 }
 
-  processQuestions(questions) {
-    return questions.map((q, index) => {
-      if (q.type === 'practical') {
-        const params = {};
-        if (q.params) {
-          Object.keys(q.params).forEach(key => {
-            const config = q.params[key];
-            let value;
-            do {
-              value = this.getRandomInt(config.min, config.max + 1);
-            } while (config.nonZero && value === 0);
-            params[key] = value;
-          });
-        }
-        this.currentParams[`q${index}`] = params;
+processQuestions(questions) {
+  return questions.map((q, index) => {
+    // Debug: Verificar la pregunta antes de procesar
+    console.log(`Procesando pregunta ${index}:`, {
+      id: q.id,
+      type: q.type,
+      hasQuestion: !!q.question,
+      hasSolutionMathjs: !!q.solution_mathjs,
+      hasSolutionLatex: !!q.solution_latex
+    });
 
+    if (q.type === 'practical') {
+      // Validar campos requeridos
+      if (!q.question || !q.solution_mathjs || !q.solution_latex) {
+        console.error(`Pregunta práctica ${q.id} falta campos requeridos`, q);
+        return null; // O podrías devolver una pregunta de error
+      }
+
+      const params = {};
+      if (q.params) {
+        Object.keys(q.params).forEach(key => {
+          const config = q.params[key];
+          let value;
+          do {
+            value = this.getRandomInt(config.min, config.max + 1);
+          } while (config.nonZero && value === 0);
+          params[key] = value;
+        });
+      }
+      this.currentParams[`q${index}`] = params;
+
+      try {
         return {
           ...q,
           renderedQuestion: this.renderTemplate(q.question, params),
@@ -185,45 +201,44 @@ class EDExamen {
           renderedSolutionLatex: this.renderTemplate(q.solution_latex, params),
           params
         };
+      } catch (error) {
+        console.error(`Error procesando pregunta ${q.id}:`, error);
+        return null; // O manejar el error de otra forma
       }
-      return q;
+    }
+    return q;
+  }).filter(q => q !== null); // Filtrar preguntas inválidas
+}
+  
+generateExam() {
+  // Limpiar examen anterior
+  this.questions = [];
+  this.currentParams = {};
+  this.userAnswers = {};
+  this.score = 0;
+
+  // Seleccionar preguntas según configuración
+  const selectedQuestions = this.selectQuestions();
+  
+  // Procesar preguntas con manejo de errores
+  try {
+    this.questions = this.processQuestions(selectedQuestions);
+    
+    // Verificar que tenemos preguntas válidas
+    if (this.questions.length === 0) {
+      throw new Error('No se generaron preguntas válidas');
+    }
+    
+    // Renderizar
+    this.renderExam();
+  } catch (error) {
+    console.error('Error generando examen:', error);
+    this.showError({
+      message: 'Error al preparar las preguntas del examen',
+      stack: error.stack
     });
   }
-
-  renderExam() {
-    const container = document.getElementById('quiz-container');
-    if (!container) {
-      console.error("No se encontró quiz-container");
-      return;
-    }
-
-    container.innerHTML = `
-      <h1>${this.config.title || 'Examen de Ecuaciones Diferenciales'}</h1>
-      <div id="quiz"></div>
-      <button id="submit-exam">Enviar Examen</button>
-      ${this.config.allowRetry ? '<button id="retry-exam">Intentar Nuevamente</button>' : ''}
-      <div id="exam-result" class="hidden"></div>
-    `;
-
-    const quizContainer = document.getElementById('quiz');
-    if (!quizContainer) {
-      console.error("No se encontró quiz");
-      return;
-    }
-
-    this.questions.forEach((q, i) => {
-      if (q.type === 'theory') {
-        quizContainer.innerHTML += this.renderTheoryQuestion(q, i);
-      } else {
-        quizContainer.innerHTML += this.renderPracticalQuestion(q, i);
-      }
-    });
-
-    if (window.MathJax) {
-      MathJax.typesetPromise().catch(err => console.error("Error en MathJax:", err));
-    }
-  }
-
+}
   renderTheoryQuestion(question, index) {
     // Mezclar opciones y guardar el mapeo correcto
     const optionsWithIndex = question.options.map((opt, i) => ({ opt, originalIndex: i }));
@@ -402,16 +417,31 @@ class EDExamen {
     }
   }
 
-  renderTemplate(template, params) {
+renderTemplate(template, params) {
+  // Validación robusta
+  if (typeof template !== 'string') {
+    console.error('Plantilla no es string:', template);
+    throw new Error(`La plantilla debe ser un string, recibido: ${typeof template}`);
+  }
+
+  try {
     return template.replace(/\{\{(.+?)\}\}/g, (_, expr) => {
       try {
-        return math.evaluate(expr, params).toString();
+        const result = math.evaluate(expr, params);
+        if (result === undefined) {
+          throw new Error(`Expresión '${expr}' evaluada como undefined`);
+        }
+        return result.toString();
       } catch (e) {
-        console.error(`Error evaluando expresión ${expr}:`, e);
-        return `{{${expr}}}`;
+        console.error(`Error evaluando expresión '${expr}' con params:`, params, e);
+        return `{{ERROR_EN_${expr}}}`;
       }
     });
+  } catch (e) {
+    console.error('Error procesando plantilla:', template, e);
+    return `[ERROR_EN_PLANTILLA: ${e.message}]`;
   }
+}
 
   renderSolutionSteps(steps, params) {
     return `
