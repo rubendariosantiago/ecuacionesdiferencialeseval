@@ -2,23 +2,44 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title id="exam-title">Examen ED</title>
-  <link rel="stylesheet" href="/css/estilo.css">
+  <title>Examen ED</title>
+  <base href="/ecuacionesdiferencialeseval/">
+  <link rel="stylesheet" href="/ecuacionesdiferencialeseval/css/estilo.css">
   <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-  <div id="quiz-container"></div>
-<p> Empezar </p>
+  <div id="quiz-container">
+    <p>Cargando examen...</p>
+  </div>
+
   <script type="module">
-  import EDExamen from '/js/main.js';
-  import config from '/js/config/config1.js';
-  
-  const examen = new EDExamen(config);
-  examen.init();
-</script>
-  
-<p> Terminar </p>
+    console.log("Iniciando carga del examen...");
+    
+    try {
+      // Importación con manejo de errores
+      const examenModule = await import('/ecuacionesdiferencialeseval/js/main.js');
+      const configModule = await import('/ecuacionesdiferencialeseval/js/config/config2.js');
+      
+      // Verificación de módulos
+      if (!examenModule.default || !configModule.default) {
+        throw new Error("Los módulos no se cargaron correctamente");
+      }
+
+      // Inicialización sin punto y coma duplicado
+      const examen = new examenModule.default(configModule.default)
+      examen.init()
+      
+    } catch (error) {
+      console.error("Error:", error);
+      document.getElementById('quiz-container').innerHTML = `
+        <div class="error">
+          <h3>Error al cargar el examen</h3>
+          <p>${error.message}</p>
+          <button onclick="window.location.reload()">Reintentar</button>
+        </div>
+      `;
+    }
+  </script>
 </body>
 </html>
