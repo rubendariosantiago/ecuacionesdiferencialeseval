@@ -6,7 +6,7 @@ const QUESTION_BANK = [
 ];
 
 // O si importas de preguntas1.js:
-import('../preguntas/preguntas1.js').then(module => {
+import('/ecuacionesdiferencialeseval/js/preguntas/preguntas1.js').then(module => {
   const questions = module.default || [];
   console.log("Preguntas cargadas:", questions.length);
   return questions;
