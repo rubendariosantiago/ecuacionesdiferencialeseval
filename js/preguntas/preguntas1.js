@@ -133,4 +133,4 @@ const QUESTION_BANK = [
   }
 ];
 
-export default QUESTION_BANK;
+export default QUESTION_BANK
