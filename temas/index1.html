@@ -1,29 +1,43 @@
-console.log("Main.js iniciado"); // Verificación de carga
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen ED</title>
+  <link rel="stylesheet" href="../css/estilo.css">
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div id="quiz-container">
+    <p>Cargando examen...</p>
+  </div>
 
-class EDExamen {
-  constructor(config) {
-    console.log("Creando examen con config:", /ecuacionesdiferencialeseval/js/config/config.js);
-    this.config = config;
-    this.questions = [];
-  }
-
-  init() {
-    console.log("Inicializando examen");
-    this.generateExam();
-  }
-
-  generateExam() {
-    console.log("Generando examen...");
-    document.getElementById('quiz-container').innerHTML = `
-      <h1>${this.config.title}</h1>
-      <div class="question">
-        <p>Examen cargado correctamente</p>
-      </div>
-    `;
-  }
-}
-
-// Exportación ES6 estándar
-export { EDExamen as default };
-
-
+  <script type="module">
+    console.log("Iniciando carga del examen...");
+    
+    try {
+      // Importación directa sin await
+      import('../js/main.js').then(mainModule => {
+        import('../js/config/config1.js').then(configModule => {
+          const examen = new mainModule.default(configModule.default);
+          examen.init();
+        }).catch(configErr => {
+          throw new Error(`Error cargando configuración: ${configErr.message}`);
+        });
+      }).catch(mainErr => {
+        throw new Error(`Error cargando main.js: ${mainErr.message}`);
+      });
+      
+    } catch (error) {
+      console.error("Error fatal:", error);
+      document.getElementById('quiz-container').innerHTML = `
+        <div style="color:red; padding:20px;">
+          <h3>Error crítico</h3>
+          <p>${error.message}</p>
+          <p>Por favor revisa la consola (F12 > Console)</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
