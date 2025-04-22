@@ -30,4 +30,4 @@ export default {
   // Configuración de evaluación
   tolerance: 1e-4,
   testPoints: [0, 0.5, 1, 1.5, 2, Math.PI/4, Math.PI/2]
-};
+}
