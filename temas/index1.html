@@ -17,8 +17,8 @@
     
     try {
       // Importación directa sin await
-      import('../js/main.js').then(mainModule => {
-        import('../js/config/config1.js').then(configModule => {
+      import('/ecuacionesdiferencialeseval/js/main.js').then(mainModule => {
+        import('/ecuacionesdiferencialeseval/js/config/config.js').then(configModule => {
           const examen = new mainModule.default(configModule.default);
           examen.init();
         }).catch(configErr => {
