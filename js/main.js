@@ -77,7 +77,7 @@ class EDExamen {
     if (theory.count > 0) {
       const theoryQuestions = this.questionBank.filter(q => {
         const isTheory = q.type === 'theory';
-        const tagsMatch = !theory.tags || (q.tags && q.tags.some(tag => theory.tags.includes(tag));
+        const tagsMatch = !theory.tags || (q.tags && q.tags.some(tag => theory.tags.includes(tag)));
         
         if (isTheory && !tagsMatch) {
           console.warn(`Pregunta teórica ${q.id} no coincide con tags requeridos`);
