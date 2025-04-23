@@ -104,7 +104,7 @@ const QUESTION_BANK = [
   {
     id: "P2",
     type: "practical",
-    tags: ["Lineales-primer-orden"],
+    tags: ["lineales-primer-orden"],
     types: ["lineales-primer-orden"], // Nuevo campo requerido
     difficulty: "medium",
     template: "Resuelve v: $$ y' + {{a}}y = {{b}} \\cos({{c}}x) $$ con \\( y(0) = {{d}} \\)",
