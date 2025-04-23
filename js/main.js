@@ -370,20 +370,17 @@ class EDExamen {
   }
 
   evaluateMath(expr, scope) {
-    try {
-      const parsedExpr = this.parseExpression(expr);
-      const evalFn = new Function(...Object.keys(scope), 
-        `'use strict'; try { return ${parsedExpr}; } catch(e) { return NaN; }`);
-      const result = evalFn(...Object.values(scope));
-      
-      if (typeof result !== 'number' || isNaN(result)) {
-        throw new Error("La expresión no produjo un número válido");
-      }
-      return result;
-    } catch (e) {
-      throw new Error(`Error de evaluación: ${e.message}`);
+  try {
+    // Usa math.evaluate directamente
+    const result = math.evaluate(expr, scope);
+    if (typeof result !== 'number' || isNaN(result)) {
+      throw new Error("La expresión no produjo un número válido");
     }
+    return result;
+  } catch (e) {
+    throw new Error(`Error de evaluación: ${e.message}`);
   }
+}
 
   renderTemplate(template, params) {
     if (typeof template !== 'string') {
