@@ -19,7 +19,7 @@
       // Importación directa sin await
       import('/ecuacionesdiferencialeseval/js/main.js').then(mainModule => {
         import('/ecuacionesdiferencialeseval/js/config/config.js').then(configModule => {
-          const examen = new mainModule.default(configModule.default) //;
+          const examen = new mainModule.default(configModule.default); //;
           examen.init();
         }).catch(configErr => {
           throw new Error(`Error cargando configuración: ${configErr.message}`);
