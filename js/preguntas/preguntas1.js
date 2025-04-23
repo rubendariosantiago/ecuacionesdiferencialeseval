@@ -75,7 +75,7 @@ const QUESTION_BANK = [
     tags: ["lineales-primer-orden"],
     types: ["lineales-primer-orden"], // Nuevo campo requerido
     difficulty: "medium",
-    template: "Resuelve: \\[ y' + {{a}}y = {{b}} \\] con \\( y(0) = {{c}} \\)",
+    question: "Resuelve: \\[ y' + {{a}}y = {{b}} \\] con \\( y(0) = {{c}} \\)",
     solution_mathjs: "({{b}}/{{a}})+({{c}}-({{b}}/{{a}}))*exp(-{{a}}*x)",
     solution_latex: "$$\\frac{ {{b}} }{ {{a}} } + \\left( {{c}} - \\frac{ {{b}} }{ {{a}} } \\right) e^{-{{a}}x}$$",
     steps: [
@@ -107,7 +107,7 @@ const QUESTION_BANK = [
     tags: ["lineales-primer-orden"],
     types: ["lineales-primer-orden"], // Nuevo campo requerido
     difficulty: "medium",
-    template: "Resuelve v: $$ y' + {{a}}y = {{b}} \\cos({{c}}x) $$ con \\( y(0) = {{d}} \\)",
+    question: "Resuelve v: $$ y' + {{a}}y = {{b}} \\cos({{c}}x) $$ con \\( y(0) = {{d}} \\)",
     solution_mathjs: "({{a}}*{{b}}*cos({{c}}*x)+{{b}}*{{c}}*sin({{c}}*x))/({{a*a}}+{{c*c}})+({{d}}-({{a}}*{{b}})/({{a*a}}+{{c*c}}))*exp(-{{a}}*x)",
     solution_latex: "$$\\frac{ {{a}}{{b}} \\cos({{c}}x) + {{b}}{{c}} \\sin({{c}}x) }{ {{a}}^2 + {{c}}^2 } + \\left( {{d}} - \\frac{ {{a}}{{b}} }{ {{a}}^2 + {{c}}^2 } \\right) e^{-{{a}}x}$$",
     steps: [
