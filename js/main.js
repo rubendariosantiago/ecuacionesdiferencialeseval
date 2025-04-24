@@ -217,24 +217,27 @@ class EDExamen {
     `;
   }
 
-  renderPracticalQuestion(question, index) {
-    const paramsInfo = Object.entries(question.params || {})
-      .map(([key, value]) => `${key} = ${value}`)
-      .join(', ');
-
-    return `
-      <div class="question practical-question" data-index="${index}">
-        <p><strong>Ejercicio práctico ${index + 1}:</strong> ${question.renderedQuestion}</p>
-        ${paramsInfo ? `<div class="param-info">Parámetros: ${paramsInfo}</div>` : ''}
-        <input type="text" class="answer-input" 
-               placeholder="Ejemplo: 3*exp(-2*x) + (x^2)/2">
-        <div class="format-help">
-          Formato: Use * para multiplicación (2*x), funciones como exp(x), sin(x), etc.
-        </div>
-        <div class="feedback hidden"></div>
-      </div>
-    `;
-  }
+renderPracticalQuestion(q, index) {
+  const html = `
+    <div class="question practical-question" data-index="${index}">
+      <p><strong>Ejercicio ${index+1}:</strong> ${q.renderedQuestion}</p>
+      ${this.renderParamsInfo(q.params)}
+      <input type="text" class="answer-input" placeholder="Ejemplo: 3*exp(-2*x)">
+      <div class="feedback hidden"></div>
+    </div>
+  `;
+  
+  // Forzar nuevo procesamiento MathJax
+  setTimeout(() => {
+    if (window.MathJax) {
+      MathJax.typesetPromise()
+        .then(() => console.log(`MathJax reprocesado para P${index}`))
+        .catch(err => console.error("MathJax error:", err));
+    }
+  }, 100);
+  
+  return html;
+}
 
   evaluateExam() {
     this.score = 0;
