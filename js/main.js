@@ -250,76 +250,43 @@ renderParamsInfo(params) {
   return `<div class="param-info">Parámetros: ${paramsList}</div>`;
 }
 
-  evaluateExam() {
-    this.score = 0;
-    const results = [];
+evaluateExam() {
+  this.score = 0;
+  
+  this.questions.forEach((q, i) => {
+    const questionEl = document.querySelector(`.question[data-index="${i}"]`);
+    if (!questionEl) return;
 
-    this.questions.forEach((q, i) => {
-      const questionEl = document.querySelector(`.question[data-index="${i}"]`);
-      if (!questionEl) {
-        console.error(`No se encontró pregunta con índice ${i}`);
-        return;
-      }
+    if (q.type === 'theory') {
+      // ... (tu lógica existente para preguntas teóricas)
+      this.showFeedback(questionEl, isCorrect, '', q.solution);
+    } 
+    else if (q.type === 'practical') {
+      const inputEl = questionEl.querySelector('.answer-input');
+      const userInput = inputEl.value.trim();
+      
+      const evaluation = this.evaluateSolution(
+        userInput, 
+        q.renderedSolutionMathjs, 
+        { ...q.params, x: 0 }
+      );
 
-      const feedbackEl = questionEl.querySelector('.feedback');
-      if (!feedbackEl) {
-        console.error(`No se encontró feedback para pregunta ${i}`);
-        return;
-      }
-
-      if (q.type === 'theory') {
-        const selected = questionEl.querySelector(`input[name="theory-${i}"]:checked`);
-        const isCorrect = selected && parseInt(selected.value) === q.shuffledAnswer;
-        
-        if (isCorrect) {
-          this.score++;
-          feedbackEl.innerHTML = '✅ Correcto!';
-          feedbackEl.className = 'feedback correct';
-        } else {
-          const correctOption = q.options[q.answer];
-          feedbackEl.innerHTML = `
-            ❌ Incorrecto. La respuesta correcta es: ${correctOption}
-            <div class="solution">${q.solution}</div>
-          `;
-          feedbackEl.className = 'feedback incorrect';
-        }
-      } else if (q.type === 'practical') {
-        const inputEl = questionEl.querySelector('.answer-input');
-        if (!inputEl) {
-          console.error(`No se encontró input para pregunta práctica ${i}`);
-          return;
-        }
-
-        const userInput = inputEl.value.trim();
-        const evaluation = this.evaluateSolution(
-          userInput, 
-          q.renderedSolutionMathjs, 
-          { ...q.params, x: 0 }
+      if (evaluation.isValid) {
+        this.score++;
+        this.showFeedback(questionEl, true);
+      } else {
+        this.showFeedback(
+          questionEl, 
+          false, 
+          q.renderedSolutionLatex,
+          q.steps
         );
-
-        if (evaluation.isValid) {
-          this.score++;
-          feedbackEl.innerHTML = '✅ Correcto!';
-          feedbackEl.className = 'feedback correct';
-        } else {
-          feedbackEl.innerHTML = `
-            ❌ Respuesta incorrecta
-            <div class="error-details">${evaluation.error}</div>
-            <div class="solution">
-              Solución esperada: <span class="mathjax">${q.renderedSolutionLatex}</span>
-              ${q.steps ? this.renderSolutionSteps(q.steps, q.params) : ''}
-            </div>
-          `;
-          feedbackEl.className = 'feedback incorrect';
-        }
       }
+    }
+  });
 
-      feedbackEl.classList.remove('hidden');
-    });
-
-    this.showFinalResult();
-  }
-
+  this.showFinalResult();
+}
   // ===== FUNCIONES AUXILIARES =====
 
   evaluateSolution(userInput, expectedSolution, params) {
@@ -468,6 +435,24 @@ renderParamsInfo(params) {
   setupEventListeners() {
     document.getElementById('submit-exam')?.addEventListener('click', () => this.evaluateExam());
     document.getElementById('retry-exam')?.addEventListener('click', () => this.generateExam());
+  }
+
+    showFeedback(questionEl, isCorrect, correctSolution, steps = []) {
+    const feedbackEl = questionEl.querySelector('.feedback');
+    
+    feedbackEl.innerHTML = isCorrect
+      ? '✅ Correcto!'
+      : `❌ Incorrecto. Solución: <span class="mathjax">${correctSolution}</span>`;
+    
+    feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    feedbackEl.classList.remove('hidden');
+
+    // Renderizar MathJax para las ecuaciones
+    if (window.MathJax) {
+      MathJax.typesetPromise([feedbackEl]).catch(err => {
+        console.error("Error renderizando MathJax:", err);
+      });
+    }
   }
 }
 
