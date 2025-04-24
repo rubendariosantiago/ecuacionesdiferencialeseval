@@ -35,12 +35,12 @@ class EDExamen {
     } else if (this.config.questionBanks) {
       const loadedBanks = await Promise.all(
         this.config.questionBanks.map(bank => 
-          import(`/ecuacionesdiferencialeseval/js/preguntas/${bank}.js`)
+          import(`./preguntas/${bank}.js`)
             .then(module => {
               if (!module.default) {
                 throw new Error(`El banco ${bank} no exporta por defecto`);
               }
-              return module.default ;
+              return module.default;
             })
             .catch(err => {
               console.error(`Error cargando ${bank}:`, err);
@@ -73,39 +73,22 @@ class EDExamen {
     const { theory = {}, practical = {} } = this.config.questionMix || {};
     const selected = [];
 
-    // Selección de preguntas teóricas
     if (theory.count > 0) {
       const theoryQuestions = this.questionBank.filter(q => {
         const isTheory = q.type === 'theory';
         const tagsMatch = !theory.tags || (q.tags && q.tags.some(tag => theory.tags.includes(tag)));
-        
-        if (isTheory && !tagsMatch) {
-          console.warn(`Pregunta teórica ${q.id} no coincide con tags requeridos`);
-        }
-        
         return isTheory && tagsMatch;
       });
-      
       selected.push(...this.getRandomElements(theoryQuestions, theory.count));
     }
 
-    // Selección de preguntas prácticas
     if (practical.count > 0) {
       const practicalQuestions = this.questionBank.filter(q => {
         const isPractical = q.type === 'practical';
         const typesMatch = !practical.types || (q.types && q.types.some(type => practical.types.includes(type)));
         const difficultyMatch = !practical.difficulty || q.difficulty === practical.difficulty;
-        
-        if (isPractical && !typesMatch) {
-          console.warn(`Pregunta práctica ${q.id} no coincide con types requeridos`);
-        }
-        if (isPractical && !difficultyMatch) {
-          console.warn(`Pregunta práctica ${q.id} no coincide con difficulty requerida`);
-        }
-        
         return isPractical && typesMatch && difficultyMatch;
       });
-      
       selected.push(...this.getRandomElements(practicalQuestions, practical.count));
     }
 
@@ -116,7 +99,6 @@ class EDExamen {
   processQuestions(questions) {
     return questions.map((q, index) => {
       if (q.type === 'practical') {
-        // Validar campos requeridos para preguntas prácticas
         if (!q.question || typeof q.question !== 'string') {
           console.error(`Pregunta ${q.id} no tiene question válido`);
           return null;
@@ -130,7 +112,6 @@ class EDExamen {
           return null;
         }
 
-        // Generar parámetros
         const params = {};
         if (q.params) {
           Object.keys(q.params).forEach(key => {
@@ -144,7 +125,6 @@ class EDExamen {
         }
         this.currentParams[`q${index}`] = params;
 
-        // Procesar plantillas
         try {
           return {
             ...q,
@@ -159,7 +139,7 @@ class EDExamen {
         }
       }
       return q;
-    }).filter(q => q !== null); // Filtrar preguntas inválidas
+    }).filter(q => q !== null);
   }
 
   renderExam() {
@@ -191,14 +171,12 @@ class EDExamen {
   }
 
   renderTheoryQuestion(question, index) {
-    // Mezclar opciones manteniendo referencia a la respuesta correcta
     const optionsWithIndex = question.options.map((opt, i) => ({ opt, originalIndex: i }));
     const shuffledOptions = [...optionsWithIndex].sort(() => Math.random() - 0.5);
     const correctShuffledIndex = shuffledOptions.findIndex(
       item => item.originalIndex === question.answer
     );
     
-    // Guardar el índice correcto mezclado
     this.questions[index].shuffledAnswer = correctShuffledIndex;
 
     const optionsHtml = shuffledOptions.map((item, i) => `
@@ -217,77 +195,70 @@ class EDExamen {
     `;
   }
 
-renderPracticalQuestion(q, index) {
-  // Genera la info de parámetros directamente
-  const paramsInfo = q.params 
-    ? `<div class="param-info">Parámetros: ${
-        Object.entries(q.params)
-          .map(([key, val]) => `${key} = ${this.currentParams[`q${index}`][key]}`)
-          .join(', ')
-      }</div>`
-    : '';
+  renderPracticalQuestion(q, index) {
+    const paramsInfo = q.params 
+      ? `<div class="param-info">Parámetros: ${
+          Object.entries(q.params)
+            .map(([key, val]) => `${key} = ${this.currentParams[`q${index}`][key]}`)
+            .join(', ')
+        }</div>`
+      : '';
 
-  return `
-    <div class="question practical-question" data-index="${index}">
-      <p><strong>Ejercicio ${index+1}:</strong> ${q.renderedQuestion}</p>
-      ${paramsInfo}
-      <input type="text" class="answer-input" placeholder="Ejemplo: 3*exp(-2*x)">
-      <div class="feedback hidden"></div>
-    </div>
-  `;
-}
+    return `
+      <div class="question practical-question" data-index="${index}">
+        <p><strong>Ejercicio ${index+1}:</strong> ${q.renderedQuestion}</p>
+        ${paramsInfo}
+        <input type="text" class="answer-input" placeholder="Ejemplo: 3*exp(-2*x)">
+        <div class="feedback hidden"></div>
+      </div>
+    `;
+  }
 
-renderParamsInfo(params) {
-  if (!params || Object.keys(params).length === 0) return '';
-  
-  const paramsList = Object.entries(params)
-    .map(([key, config]) => {
-      const value = this.currentParams[`q${index}`]?.[key] || config.default;
-      return `${key} = ${value}`;
-    })
-    .join(', ');
+  evaluateExam() {
+    this.score = 0;
+    
+    this.questions.forEach((q, i) => {
+      const questionEl = document.querySelector(`.question[data-index="${i}"]`);
+      if (!questionEl) return;
 
-  return `<div class="param-info">Parámetros: ${paramsList}</div>`;
-}
-
-evaluateExam() {
-  this.score = 0;
-  
-  this.questions.forEach((q, i) => {
-    const questionEl = document.querySelector(`.question[data-index="${i}"]`);
-    if (!questionEl) return;
-
-    if (q.type === 'theory') {
-      // ... (tu lógica existente para preguntas teóricas)
-      this.showFeedback(questionEl, isCorrect, '', q.solution);
-    } 
-    else if (q.type === 'practical') {
-      const inputEl = questionEl.querySelector('.answer-input');
-      const userInput = inputEl.value.trim();
-      
-      const evaluation = this.evaluateSolution(
-        userInput, 
-        q.renderedSolutionMathjs, 
-        { ...q.params, x: 0 }
-      );
-
-      if (evaluation.isValid) {
-        this.score++;
-        this.showFeedback(questionEl, true);
-      } else {
+      if (q.type === 'theory') {
+        const selected = questionEl.querySelector(`input[name="theory-${i}"]:checked`);
+        const isCorrect = selected && parseInt(selected.value) === q.shuffledAnswer;
+        
         this.showFeedback(
-          questionEl, 
-          false, 
-          q.renderedSolutionLatex,
-          q.steps
+          questionEl,
+          isCorrect,
+          isCorrect ? '' : q.solution
         );
-      }
-    }
-  });
+        
+        if (isCorrect) this.score++;
+      } 
+      else if (q.type === 'practical') {
+        const inputEl = questionEl.querySelector('.answer-input');
+        const userInput = inputEl.value.trim();
+        
+        const evaluation = this.evaluateSolution(
+          userInput, 
+          q.renderedSolutionMathjs, 
+          { ...q.params, x: 0 }
+        );
 
-  this.showFinalResult();
-}
-  // ===== FUNCIONES AUXILIARES =====
+        if (evaluation.isValid) {
+          this.score++;
+          this.showFeedback(questionEl, true);
+        } else {
+          this.showFeedback(
+            questionEl, 
+            false, 
+            q.renderedSolutionLatex,
+            q.steps
+          );
+        }
+      }
+    });
+
+    this.showFinalResult();
+  }
 
   evaluateSolution(userInput, expectedSolution, params) {
     try {
@@ -304,8 +275,8 @@ evaluateExam() {
       for (const x of this.config.testPoints || TEST_POINTS) {
         try {
           scope.x = x;
-          const userVal = this.evaluateMath(userInput, scope);
-          const expectedVal = this.evaluateMath(expectedSolution, scope);
+          const userVal = math.evaluate(userInput, scope);
+          const expectedVal = math.evaluate(expectedSolution, scope);
 
           if (Math.abs(expectedVal) > 1e12) continue;
 
@@ -319,12 +290,11 @@ evaluateExam() {
       }
 
       if (validPoints === 0) {
-        const errorAnalysis = [
+        throw new Error([
           "No se pudo evaluar en ningún punto. Posibles causas:",
           ...new Set(errors),
           "Ejemplo de formato válido: (2*cos(3*x)+4*sin(3*x))/5 + exp(-2*x)"
-        ].join('<br>• ');
-        throw new Error(errorAnalysis);
+        ].join('<br>• '));
       }
 
       if (validPoints < (this.config.testPoints || TEST_POINTS).length * 0.6) {
@@ -350,22 +320,8 @@ evaluateExam() {
     }
   }
 
-  evaluateMath(expr, scope) {
-  try {
-    // Usa math.evaluate directamente
-    const result = math.evaluate(expr, scope);
-    if (typeof result !== 'number' || isNaN(result)) {
-      throw new Error("La expresión no produjo un número válido");
-    }
-    return result;
-  } catch (e) {
-    throw new Error(`Error de evaluación: ${e.message}`);
-  }
-}
-
   renderTemplate(template, params) {
     if (typeof template !== 'string') {
-      console.error('Plantilla no es string:', template);
       throw new Error("La plantilla debe ser un string");
     }
 
@@ -383,15 +339,30 @@ evaluateExam() {
     });
   }
 
-  renderSolutionSteps(steps, params) {
-    if (!steps || !Array.isArray(steps)) return '';
+  showFeedback(questionEl, isCorrect, correctSolution = '', steps = []) {
+    const feedbackEl = questionEl.querySelector('.feedback');
     
+    feedbackEl.innerHTML = isCorrect
+      ? '✅ Correcto!'
+      : `❌ Incorrecto. ${correctSolution ? `Solución: <span class="mathjax">${correctSolution}</span>` : ''}
+         ${steps ? this.renderSolutionSteps(steps) : ''}`;
+    
+    feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    feedbackEl.classList.remove('hidden');
+
+    if (window.MathJax) {
+      MathJax.typesetPromise([feedbackEl]).catch(err => {
+        console.error("Error renderizando MathJax:", err);
+      });
+    }
+  }
+
+  renderSolutionSteps(steps) {
+    if (!steps || !Array.isArray(steps)) return '';
     return `
       <div class="solution-steps">
         <strong>Pasos de solución:</strong>
-        ${steps.map(step => `
-          <div>${this.renderTemplate(step, params)}</div>
-        `).join('')}
+        ${steps.map(step => `<div>${step}</div>`).join('')}
       </div>
     `;
   }
@@ -435,24 +406,6 @@ evaluateExam() {
   setupEventListeners() {
     document.getElementById('submit-exam')?.addEventListener('click', () => this.evaluateExam());
     document.getElementById('retry-exam')?.addEventListener('click', () => this.generateExam());
-  }
-
-    showFeedback(questionEl, isCorrect, correctSolution, steps = []) {
-    const feedbackEl = questionEl.querySelector('.feedback');
-    
-    feedbackEl.innerHTML = isCorrect
-      ? '✅ Correcto!'
-      : `❌ Incorrecto. Solución: <span class="mathjax">${correctSolution}</span>`;
-    
-    feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
-    feedbackEl.classList.remove('hidden');
-
-    // Renderizar MathJax para las ecuaciones
-    if (window.MathJax) {
-      MathJax.typesetPromise([feedbackEl]).catch(err => {
-        console.error("Error renderizando MathJax:", err);
-      });
-    }
   }
 }
 
