@@ -237,6 +237,19 @@ renderPracticalQuestion(q, index) {
   `;
 }
 
+renderParamsInfo(params) {
+  if (!params || Object.keys(params).length === 0) return '';
+  
+  const paramsList = Object.entries(params)
+    .map(([key, config]) => {
+      const value = this.currentParams[`q${index}`]?.[key] || config.default;
+      return `${key} = ${value}`;
+    })
+    .join(', ');
+
+  return `<div class="param-info">Parámetros: ${paramsList}</div>`;
+}
+
   evaluateExam() {
     this.score = 0;
     const results = [];
