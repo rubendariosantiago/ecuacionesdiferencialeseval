@@ -218,25 +218,23 @@ class EDExamen {
   }
 
 renderPracticalQuestion(q, index) {
-  const html = `
+  // Genera la info de parámetros directamente
+  const paramsInfo = q.params 
+    ? `<div class="param-info">Parámetros: ${
+        Object.entries(q.params)
+          .map(([key, val]) => `${key} = ${this.currentParams[`q${index}`][key]}`)
+          .join(', ')
+      }</div>`
+    : '';
+
+  return `
     <div class="question practical-question" data-index="${index}">
       <p><strong>Ejercicio ${index+1}:</strong> ${q.renderedQuestion}</p>
-      ${this.renderParamsInfo(q.params)}
+      ${paramsInfo}
       <input type="text" class="answer-input" placeholder="Ejemplo: 3*exp(-2*x)">
       <div class="feedback hidden"></div>
     </div>
   `;
-  
-  // Forzar nuevo procesamiento MathJax
-  setTimeout(() => {
-    if (window.MathJax) {
-      MathJax.typesetPromise()
-        .then(() => console.log(`MathJax reprocesado para P${index}`))
-        .catch(err => console.error("MathJax error:", err));
-    }
-  }, 100);
-  
-  return html;
 }
 
   evaluateExam() {
