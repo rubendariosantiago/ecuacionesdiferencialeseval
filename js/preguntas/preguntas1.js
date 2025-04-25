@@ -75,7 +75,7 @@ const QUESTION_BANK = [
     tags: ["lineales-primer-orden"],
     types: ["lineales-primer-orden"], // Nuevo campo requerido
     difficulty: "medium",
-    question: "Resuelve: $$ y' + {{a}}y = {{b}} \\] con \\( y(0) = {{c}} $$",
+    question: "Resuelve: $$ y' + {{a}}y = {{b}} \\hbox{ con } y(0) = {{c}} $$",
     solution_mathjs: "({{b}}/{{a}})+({{c}}-({{b}}/{{a}}))*exp(-{{a}}*x)",
     solution_latex: "$$\\frac{ {{b}} }{ {{a}} } + \\left( {{c}} - \\frac{ {{b}} }{ {{a}} } \\right) e^{-{{a}}x}$$",
     steps: [
