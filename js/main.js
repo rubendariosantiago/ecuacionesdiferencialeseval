@@ -2,7 +2,6 @@
 const TOLERANCE = 1e-5;
 const TEST_POINTS = [0, 0.1, 0.5, 1, Math.PI/4];
 
-// Clase principal del examen
 class EDExamen {
   constructor(config) {
     this.config = {
@@ -14,6 +13,8 @@ class EDExamen {
     this.currentParams = {};
     this.userAnswers = {};
     this.score = 0;
+    this.mathJaxRetryCount = 0;
+    this.maxMathJaxRetries = 3;
   }
 
   async init() {
@@ -99,12 +100,10 @@ class EDExamen {
   processQuestions(questions) {
     return questions.map((q, index) => {
       if (q.type === 'practical') {
-        // Validación de campos requeridos
         if (!q.question || typeof q.question !== 'string') return null;
         if (!q.solution_mathjs || typeof q.solution_mathjs !== 'string') return null;
         if (!q.solution_latex || typeof q.solution_latex !== 'string') return null;
 
-        // Generar parámetros
         const params = {};
         if (q.params) {
           Object.keys(q.params).forEach(key => {
@@ -118,7 +117,6 @@ class EDExamen {
         }
         this.currentParams[`q${index}`] = params;
 
-        // Procesar plantillas
         try {
           return {
             ...q,
@@ -156,8 +154,7 @@ class EDExamen {
         : this.renderPracticalQuestion(q, i);
     });
 
-    // Reprocesar MathJax para todo el examen
-    this.renderMathJax();
+    this.safeRenderMathJax();
   }
 
   renderTheoryQuestion(question, index) {
@@ -306,7 +303,7 @@ class EDExamen {
     feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
     feedbackEl.classList.remove('hidden');
 
-    this.renderMathJax([feedbackEl]);
+    this.safeRenderMathJax([feedbackEl]);
   }
 
   renderSolutionSteps(steps) {
@@ -333,16 +330,34 @@ class EDExamen {
     });
   }
 
-  renderMathJax(elements = []) {
-    if (!window.MathJax) return;
-    
-    try {
-      MathJax.typesetPromise(elements).catch(e => {
-        console.error("Error en MathJax.typeset:", e);
-      });
-    } catch (e) {
-      console.error("Error al llamar a MathJax:", e);
+  safeRenderMathJax(elements = []) {
+    if (!window.MathJax) {
+      console.warn("MathJax no está disponible");
+      return;
     }
+
+    if (this.mathJaxRetryCount >= this.maxMathJaxRetries) {
+      console.warn("Se alcanzó el máximo de reintentos de MathJax");
+      return;
+    }
+
+    this.mathJaxRetryCount++;
+    
+    const render = () => {
+      MathJax.typesetPromise(elements)
+        .then(() => {
+          console.log("MathJax renderizado correctamente");
+          this.mathJaxRetryCount = 0;
+        })
+        .catch(err => {
+          console.error(`Intento ${this.mathJaxRetryCount} fallido:`, err);
+          if (this.mathJaxRetryCount < this.maxMathJaxRetries) {
+            setTimeout(render, 300 * this.mathJaxRetryCount);
+          }
+        });
+    };
+
+    render();
   }
 
   showFinalResult() {
@@ -358,7 +373,7 @@ class EDExamen {
         : '<p class="fail">Intenta nuevamente</p>'}
     `;
     resultEl.classList.remove('hidden');
-    this.renderMathJax([resultEl]);
+    this.safeRenderMathJax([resultEl]);
   }
 
   showError(error) {
