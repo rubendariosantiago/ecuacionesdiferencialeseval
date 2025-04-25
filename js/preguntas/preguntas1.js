@@ -112,7 +112,7 @@ const QUESTION_BANK = [
       "Sustituyendo en la ecuación diferencial resulta: $$(-{{c}}A\\sin({{c}}x) + {{c}}B\\cos({{c}}x)) + {{a}}(A\\cos({{c}}x) + B\\sin({{c}}x)) = {{b}}\\cos({{c}}x) $$",
       "Al agrupar términos se obtiene: $$ (-{{c}}A + {{a}}B)\\sin({{c}}x) + ({{c}}B + {{a}}A)\\cos({{c}}x) = {{b}}\\cos({{c}}x) $$",
       "De aquí, obtenemos el sistema de ecuaciones: $$ {{a}}A + {{c}}B = {{b}};\\quad \\quad \\\\ -{{c}}A + {{a}}B = 0 $$",
-      "Cuya solución es: \\[ A = \\frac{ {{a}}{{b}} }{ {{a}}^2 + {{c}}^2 };\\quad \\quad \\\\ B = \\frac{ {{c}}{{b}} }{ {{a}}^2 + {{c}}^2 } \\]",
+      "Cuya solución es: $$ A = \\frac{ {{a}}{{b}} }{ {{a}}^2 + {{c}}^2 };\\quad \\quad \\\\ B = \\frac{ {{c}}{{b}} }{ {{a}}^2 + {{c}}^2 } $$",
       "La solución general está dada por: \\[ y = y_h + y_p \\]",
       "Finalmente, al aplicar la condición inicial \\( y(0) = {{d}} \\) se encuentra  \\( C \\)"
     ],
