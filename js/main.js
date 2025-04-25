@@ -347,15 +347,18 @@ showFeedback(questionEl, isCorrect, correctSolution = '', steps = [], params = {
     : `❌ Incorrecto. ${correctSolution ? `Solución: <span class="mathjax">${correctSolution}</span>` : ''}
        ${steps ? this.renderSolutionSteps(steps, params) : ''}`;
 
-  renderSolutionSteps(steps) {
-    if (!steps || !Array.isArray(steps)) return '';
-    return `
-      <div class="solution-steps">
-        <strong>Pasos de solución:</strong>
-        ${steps.map(step => `<div>${step}</div>`).join('')}
-      </div>
-    `;
-  }
+renderSolutionSteps(steps, params) {
+  if (!steps || !Array.isArray(steps)) return '';
+  
+  return `
+    <div class="solution-steps">
+      <strong>Pasos de solución:</strong>
+      ${steps.map(step => `
+        <div class="mathjax">${this.renderTemplate(step, params)}</div>
+      `).join('')}
+    </div>
+  `;
+}
 
   showFinalResult() {
     const resultEl = document.getElementById('exam-result');
