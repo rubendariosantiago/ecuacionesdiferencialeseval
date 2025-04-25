@@ -339,23 +339,13 @@ class EDExamen {
     });
   }
 
-  showFeedback(questionEl, isCorrect, correctSolution = '', steps = []) {
-    const feedbackEl = questionEl.querySelector('.feedback');
-    
-    feedbackEl.innerHTML = isCorrect
-      ? '✅ Correcto!'
-      : `❌ Incorrecto. ${correctSolution ? `Solución: <span class="mathjax">${correctSolution}</span>` : ''}
-         ${steps ? this.renderSolutionSteps(steps) : ''}`;
-    
-    feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
-    feedbackEl.classList.remove('hidden');
-
-    if (window.MathJax) {
-      MathJax.typesetPromise([feedbackEl]).catch(err => {
-        console.error("Error renderizando MathJax:", err);
-      });
-    }
-  }
+showFeedback(questionEl, isCorrect, correctSolution = '', steps = [], params = {}) {
+  const feedbackEl = questionEl.querySelector('.feedback');
+  
+  feedbackEl.innerHTML = isCorrect
+    ? '✅ Correcto!'
+    : `❌ Incorrecto. ${correctSolution ? `Solución: <span class="mathjax">${correctSolution}</span>` : ''}
+       ${steps ? this.renderSolutionSteps(steps, params) : ''}`;
 
   renderSolutionSteps(steps) {
     if (!steps || !Array.isArray(steps)) return '';
