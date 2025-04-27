@@ -2,6 +2,7 @@
 const TOLERANCE = 1e-5;
 const TEST_POINTS = [0, 0.1, 0.5, 1, Math.PI/4];
 
+// Clase principal del examen
 class EDExamen {
   constructor(config) {
     this.config = {
@@ -13,19 +14,16 @@ class EDExamen {
     this.currentParams = {};
     this.userAnswers = {};
     this.score = 0;
+    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    this.isMobile = window.innerWidth < 768;
     this.mathJaxRetryCount = 0;
-    this.maxMathJaxRetries = 5; // Aumentado para Safari
-    this.isMobile = this.checkMobile();
   }
-
-  // ========== MÉTODOS PRINCIPALES ==========
 
   async init() {
     try {
       await this.loadQuestions();
       this.generateExam();
       this.setupEventListeners();
-      this.applyMobileStyles();
       console.log("Examen inicializado correctamente");
     } catch (error) {
       console.error("Error al inicializar examen:", error);
@@ -33,43 +31,32 @@ class EDExamen {
     }
   }
 
-  // ========== MEJORAS PARA DISPOSITIVOS MÓVILES ==========
-
-  checkMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  async loadQuestions() {
+    console.log("Cargando preguntas...");
+    if (this.config.questions) {
+      this.questionBank = this.config.questions;
+    } else if (this.config.questionBanks) {
+      const loadedBanks = await Promise.all(
+        this.config.questionBanks.map(bank => 
+          import(`./preguntas/${bank}.js`)
+            .then(module => {
+              if (!module.default) {
+                throw new Error(`El banco ${bank} no exporta por defecto`);
+              }
+              return module.default;
+            })
+            .catch(err => {
+              console.error(`Error cargando ${bank}:`, err);
+              return [];
+            })
+        )
+      );
+      this.questionBank = loadedBanks.flat();
+    }
+    console.log("Total de preguntas cargadas:", this.questionBank.length);
   }
 
-  applyMobileStyles() {
-    if (!this.isMobile) return;
-
-    const style = document.createElement('style');
-    style.textContent = `
-      .question {
-        padding: 12px;
-        margin: 10px 0;
-      }
-      input[type="text"] {
-        font-size: 14px;
-        padding: 6px;
-      }
-      button {
-        padding: 8px 12px;
-        margin: 5px;
-        font-size: 14px;
-      }
-      .param-info {
-        font-size: 12px;
-      }
-      .MathJax {
-        font-size: 1em !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  // ========== GENERACIÓN DEL EXAMEN ==========
-
-  generateExam(newAttempt = false) {
+  generateExam() {
     this.questions = [];
     this.currentParams = {};
     this.userAnswers = {};
@@ -83,10 +70,75 @@ class EDExamen {
       throw new Error("No se pudo generar el examen. No hay preguntas válidas.");
     }
     
-    this.renderExam(newAttempt);
+    this.renderExam();
   }
 
-  renderExam(newAttempt = false) {
+  selectQuestions() {
+    const { theory = {}, practical = {} } = this.config.questionMix || {};
+    const selected = [];
+
+    if (theory.count > 0) {
+      const theoryQuestions = this.questionBank.filter(q => {
+        const isTheory = q.type === 'theory';
+        const tagsMatch = !theory.tags || (q.tags && q.tags.some(tag => theory.tags.includes(tag)));
+        return isTheory && tagsMatch;
+      });
+      selected.push(...this.getRandomElements(theoryQuestions, theory.count));
+    }
+
+    if (practical.count > 0) {
+      const practicalQuestions = this.questionBank.filter(q => {
+        const isPractical = q.type === 'practical';
+        const typesMatch = !practical.types || (q.types && q.types.some(type => practical.types.includes(type)));
+        const difficultyMatch = !practical.difficulty || q.difficulty === practical.difficulty;
+        return isPractical && typesMatch && difficultyMatch;
+      });
+      selected.push(...this.getRandomElements(practicalQuestions, practical.count));
+    }
+
+    console.log("Preguntas seleccionadas:", selected.map(q => q.id));
+    return selected;
+  }
+
+  processQuestions(questions) {
+    return questions.map((q, index) => {
+      if (q.type === 'practical') {
+        if (!q.question || typeof q.question !== 'string') return null;
+        if (!q.solution_mathjs || typeof q.solution_mathjs !== 'string') return null;
+        if (!q.solution_latex || typeof q.solution_latex !== 'string') return null;
+
+        const params = {};
+        if (q.params) {
+          Object.keys(q.params).forEach(key => {
+            const config = q.params[key];
+            let value;
+            do {
+              value = this.getRandomInt(config.min, config.max + 1);
+            } while (config.nonZero && value === 0);
+            params[key] = value;
+          });
+        }
+        this.currentParams[`q${index}`] = params;
+
+        try {
+          return {
+            ...q,
+            renderedQuestion: this.renderTemplate(q.question, params),
+            renderedSolutionMathjs: this.renderTemplate(q.solution_mathjs, params),
+            renderedSolutionLatex: this.renderTemplate(q.solution_latex, params),
+            renderedSteps: q.steps?.map(step => this.renderTemplate(step, params)) || [],
+            params
+          };
+        } catch (error) {
+          console.error(`Error procesando pregunta ${q.id}:`, error);
+          return null;
+        }
+      }
+      return q;
+    }).filter(q => q !== null);
+  }
+
+  renderExam() {
     const container = document.getElementById('quiz-container');
     if (!container) throw new Error("No se encontró el contenedor del examen");
 
@@ -94,9 +146,9 @@ class EDExamen {
       <h1>${this.config.title || 'Examen de Ecuaciones Diferenciales'}</h1>
       <div id="quiz"></div>
       <div class="button-container">
-        <button id="submit-exam" ${newAttempt ? 'class="hidden"' : ''}>Enviar Examen</button>
+        <button id="submit-exam">Enviar Examen</button>
         <button id="new-exam">Generar Nuevo Examen</button>
-        ${this.config.allowRetry ? '<button id="retry-exam">Intentar Nuevamente</button>' : ''}
+        ${this.config.allowRetry ? '<button id="retry-exam">Reintentar Mismo Examen</button>' : ''}
       </div>
       <div id="exam-result" class="hidden"></div>
     `;
@@ -108,46 +160,51 @@ class EDExamen {
         : this.renderPracticalQuestion(q, i);
     });
 
+    this.applyMobileStyles();
     this.safeRenderMathJax();
   }
 
-  // ========== COMPATIBILIDAD CON SAFARI ==========
+  renderTheoryQuestion(question, index) {
+    const optionsWithIndex = question.options.map((opt, i) => ({ opt, originalIndex: i }));
+    const shuffledOptions = [...optionsWithIndex].sort(() => Math.random() - 0.5);
+    const correctShuffledIndex = shuffledOptions.findIndex(
+      item => item.originalIndex === question.answer
+    );
+    
+    this.questions[index].shuffledAnswer = correctShuffledIndex;
 
-  safeRenderMathJax(elements = []) {
-    if (!window.MathJax) {
-      if (this.mathJaxRetryCount < this.maxMathJaxRetries) {
-        setTimeout(() => this.safeRenderMathJax(elements), 500);
-        this.mathJaxRetryCount++;
-      }
-      return;
-    }
-
-    // Solución especial para Safari
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (isSafari) {
-      document.querySelectorAll('.mathjax, .MathJax').forEach(el => {
-        el.style.display = 'inline-block';
-      });
-    }
-
-    MathJax.typesetPromise(elements)
-      .then(() => {
-        if (isSafari) {
-          setTimeout(() => {
-            MathJax.typesetPromise(elements).catch(e => console.error("Safari retry error:", e));
-          }, 300);
-        }
-      })
-      .catch(err => {
-        console.error("Error en MathJax:", err);
-        if (this.mathJaxRetryCount < this.maxMathJaxRetries) {
-          setTimeout(() => this.safeRenderMathJax(elements), 500);
-          this.mathJaxRetryCount++;
-        }
-      });
+    return `
+      <div class="question theory-question" data-index="${index}">
+        <p><strong>Pregunta teórica ${index + 1}:</strong> ${question.question}</p>
+        ${shuffledOptions.map((item, i) => `
+          <label>
+            <input type="radio" name="theory-${index}" value="${i}">
+            ${item.opt}
+          </label>
+        `).join('')}
+        <div class="feedback hidden"></div>
+      </div>
+    `;
   }
 
-  // ========== EVALUACIÓN Y RESULTADOS ==========
+  renderPracticalQuestion(q, index) {
+    const paramsInfo = q.params 
+      ? `<div class="param-info">Parámetros: ${
+          Object.entries(q.params)
+            .map(([key, val]) => `${key} = ${this.currentParams[`q${index}`][key]}`)
+            .join(', ')
+        }</div>`
+      : '';
+
+    return `
+      <div class="question practical-question" data-index="${index}">
+        <p><strong>Ejercicio ${index+1}:</strong> ${q.renderedQuestion}</p>
+        ${paramsInfo}
+        <input type="text" class="answer-input" placeholder="Ejemplo: 3*exp(-2*x)">
+        <div class="feedback hidden"></div>
+      </div>
+    `;
+  }
 
   evaluateExam() {
     this.score = 0;
@@ -185,20 +242,169 @@ class EDExamen {
             questionEl, 
             false, 
             q.renderedSolutionLatex,
-            q.renderedSteps,
-            q.params
+            q.renderedSteps
           );
         }
       }
     });
 
     this.showFinalResult();
+    document.getElementById('submit-exam').classList.add('hidden');
+  }
+
+  evaluateSolution(userInput, expectedSolution, params) {
+    try {
+      if (!userInput || userInput.trim().length < 3) {
+        throw new Error("Expresión demasiado corta");
+      }
+
+      userInput = userInput.trim().replace(/^['"]|['"]$/g, '');
+      const scope = {...params};
+      let maxError = 0;
+      let validPoints = 0;
+
+      for (const x of this.config.testPoints || TEST_POINTS) {
+        try {
+          scope.x = x;
+          const userVal = math.evaluate(userInput, scope);
+          const expectedVal = math.evaluate(expectedSolution, scope);
+
+          if (Math.abs(expectedVal) > 1e12) continue;
+
+          const error = Math.abs(userVal - expectedVal) / (1 + Math.abs(expectedVal));
+          maxError = Math.max(maxError, error);
+          validPoints++;
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (validPoints === 0) throw new Error("No se pudo evaluar en ningún punto");
+      if (validPoints < (this.config.testPoints || TEST_POINTS).length * 0.6) {
+        throw new Error("Solo se evaluó en algunos puntos");
+      }
+
+      return {
+        isValid: maxError < (this.config.tolerance || TOLERANCE),
+        error: maxError < (this.config.tolerance || TOLERANCE) ? null : `Error máximo: ${maxError.toExponential(2)}`,
+        maxError,
+        pointsTested: validPoints
+      };
+    } catch (e) {
+      return {
+        isValid: false,
+        error: e.message,
+        pointsTested: 0
+      };
+    }
+  }
+
+  showFeedback(questionEl, isCorrect, correctSolution = '', steps = []) {
+    const feedbackEl = questionEl.querySelector('.feedback');
+    
+    feedbackEl.innerHTML = isCorrect
+      ? '✅ Correcto!'
+      : `❌ Incorrecto. ${correctSolution ? `Solución: <span class="mathjax">${correctSolution}</span>` : ''}
+         ${steps?.length ? this.renderSolutionSteps(steps) : ''}`;
+    
+    feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    feedbackEl.classList.remove('hidden');
+
+    this.safeRenderMathJax([feedbackEl]);
+  }
+
+  renderSolutionSteps(steps) {
+    if (!steps?.length) return '';
+    return `
+      <div class="solution-steps">
+        <strong>Pasos de solución:</strong>
+        ${steps.map(step => `<div class="mathjax">${step}</div>`).join('')}
+      </div>
+    `;
+  }
+
+  renderTemplate(template, params) {
+    if (typeof template !== 'string') return template;
+    
+    return template.replace(/\{\{(.+?)\}\}/g, (_, expr) => {
+      try {
+        const result = math.evaluate(expr, params);
+        return result?.toString() ?? `{{${expr}}}`;
+      } catch (e) {
+        console.error(`Error en expresión '${expr}':`, e);
+        return `{{${expr}}}`;
+      }
+    });
+  }
+
+  safeRenderMathJax(elements = []) {
+    if (!window.MathJax) {
+      if (this.mathJaxRetryCount < 5) {
+        setTimeout(() => {
+          this.mathJaxRetryCount++;
+          this.safeRenderMathJax(elements);
+        }, 500);
+      }
+      return;
+    }
+
+    // Solución especial para Safari
+    if (this.isSafari) {
+      document.querySelectorAll('.mathjax').forEach(el => {
+        el.style.display = 'inline-block';
+      });
+      
+      // Múltiples intentos para Safari
+      MathJax.typesetPromise(elements).catch(e => console.error("MathJax error:", e));
+      setTimeout(() => {
+        MathJax.typesetPromise(elements).catch(e => console.error("MathJax retry 1:", e));
+      }, 300);
+      setTimeout(() => {
+        MathJax.typesetPromise(elements).catch(e => console.error("MathJax retry 2:", e));
+      }, 800);
+    } else {
+      MathJax.typesetPromise(elements).catch(e => console.error("MathJax error:", e));
+    }
+  }
+
+  applyMobileStyles() {
+    if (!this.isMobile) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .question {
+        padding: 12px;
+        margin: 10px 0;
+      }
+      input[type="text"] {
+        font-size: 14px;
+        padding: 8px;
+        width: 95% !important;
+      }
+      button {
+        padding: 10px;
+        margin: 5px;
+        font-size: 14px;
+      }
+      .button-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .MathJax {
+        font-size: 1em !important;
+        overflow-x: auto;
+        max-width: 100%;
+      }
+      .param-info {
+        font-size: 12px;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   showFinalResult() {
     const resultEl = document.getElementById('exam-result');
-    const submitBtn = document.getElementById('submit-exam');
-    if (!resultEl || !submitBtn) return;
+    if (!resultEl) return;
 
     const percentage = (this.score / this.questions.length * 100).toFixed(1);
     resultEl.innerHTML = `
@@ -209,14 +415,27 @@ class EDExamen {
         : '<p class="fail">Intenta nuevamente</p>'}
     `;
     resultEl.classList.remove('hidden');
-    
-    // Ocultar botón de enviar después de mostrar resultados
-    submitBtn.classList.add('hidden');
-    
     this.safeRenderMathJax([resultEl]);
   }
 
-  // ========== MANEJO DE EVENTOS ==========
+  showError(error) {
+    const container = document.getElementById('quiz-container') || document.body;
+    container.innerHTML = `
+      <div class="error">
+        <h2>Error al cargar el examen</h2>
+        <p>${error.message}</p>
+        <button onclick="window.location.reload()">Recargar</button>
+      </div>
+    `;
+  }
+
+  getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  getRandomElements(arr, n) {
+    return arr?.length ? [...arr].sort(() => 0.5 - Math.random()).slice(0, n) : [];
+  }
 
   setupEventListeners() {
     document.getElementById('submit-exam')?.addEventListener('click', () => this.evaluateExam());
@@ -224,20 +443,11 @@ class EDExamen {
       this.generateExam();
       document.getElementById('submit-exam').classList.remove('hidden');
     });
-    
-    // Nuevo botón para generar examen diferente
     document.getElementById('new-exam')?.addEventListener('click', () => {
-      this.generateExam(true);
+      this.generateExam();
+      document.getElementById('submit-exam').classList.remove('hidden');
     });
   }
-
-  // ========== MÉTODOS AUXILIARES ==========
-  // ... (los métodos auxiliares restantes permanecen iguales que en la versión anterior)
-  // getRandomInt, getRandomElements, renderTemplate, showError, etc.
-
-  // ========== RENDERIZADO DE PREGUNTAS ==========
-  // ... (los métodos de renderizado permanecen iguales que en la versión anterior)
-  // renderTheoryQuestion, renderPracticalQuestion, renderSolutionSteps, etc.
 }
 
 export default EDExamen;
