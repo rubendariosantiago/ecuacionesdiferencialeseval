@@ -33,7 +33,7 @@
     
     try {
       // Importación directa sin await
-      import('/ecuacionesdiferencialeseval/js/main1.js').then(mainModule => {
+      import('/ecuacionesdiferencialeseval/js/main.js').then(mainModule => {
         import('/ecuacionesdiferencialeseval/js/config/config1.js').then(configModule => {
           const examen = new mainModule.default(configModule.default); //;
           examen.init();
