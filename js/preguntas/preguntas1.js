@@ -123,6 +123,38 @@ const QUESTION_BANK = [
       d: { min: -3, max: 3 }
     },
     conditions: []
+  },
+ {
+    id: "OM1",
+    type: "practicaOM",
+    tags: ["ED-orden1"],
+    types: ["ED-orden1"], // Nuevo campo requerido
+    difficulty: "medium",
+    question: "Resuelve v: $$ y' + {{a}}y = {{b}} \\quad\\hbox{ con }  y(0) = {{c}} $$",
+    options: [
+      "\\( y = \\frac{ {{b}} }{ {{a}} } + \\left( \\frac{ {{a*c-b}} }{ {{a}} } \\right) e^{-{{a}}x} \\)",
+      "\\( y = -\\frac{ {{b}} }{ {{a}} } + \\left( \\frac{ {{a*c+b}} }{ {{a}} } \\right) e^{-{{a}}x} \\)",
+      "\\( y = \\frac{ {{a}} }{ {{b}} } + \\left( \\frac{ {{a*c+b}} }{ {{a}} } \\right) e^{{{a}}x}\\)",
+      "\\( y = -\\frac{ {{b}} }{ {{a}} } + \\left( \\frac{ {{a*c+b}} }{ {{a}} } \\right) e^{-{{b}}x}\\)"
+    ],
+    answer: 0,
+    steps: [
+      "Primero identificamos que es una ecuación diferencial lineal de primer orden: $$ y' + P(x)y = Q(x) $$",
+      "En este caso, el factor integrante es: $$ \\mu(x) = e^{\\int {{a}} \\, dx} = e^{ {{a}} x} $$",
+      "Al multiplicar la ecuación por este factor se tiene: $$ e^{ {{a}} x}y' + {{ a }}e^{ {{a}} x}y = {{b}}e^{ {{a}} x} $$",
+      "Como la suma del lado izquierdo  es la derivada de un producto resulta: $$ \\frac{d}{dx}(e^{ {{a}} x}y) = {{b}}e^{ {{a}} x} $$",
+      "Integrando en ambos lados se obtiene: $$ e^{ {{a}} x}y = \\frac{ {{b}} }{ {{a}} }e^{ {{a}} x} + C $$",
+      "Al despejar la variable \\\( y \\\) se tiene: $$ y = \\frac{ {{b}} }{ {{a}} } + Ce^{-{{a}}x} $$",
+      "Al aplicar la condición inicial \\\( y(0) = {{c}} \\\) se obtiene: $$ {{c}} = \\frac{ {{b}} }{ {{a}} } + C \\longrightarrow  C = {{c}} - \\frac{ {{b}} }{ {{a}} }=\\frac{ {{a*c-b}} }{ {{a}} }={{c - b/ a}} $$",
+      "Finalmente, la solución de la ecuación diferencial es: $$ y(x) = \\frac{ {{b}} }{ {{a}} } + \\left( \\frac{ {{a*c-b}} }{ {{a}} } \\right) e^{-{{a}}x}= {{b/a}}+{{c-b/a}} e^{-{{a}} x} $$"
+    ],
+    params: {
+      a: [ 2, 4, 6 ],
+      b: [ 3, 5, 7 ],
+      c: { min: 2, max: 5 },
+      d: { min: -3, max: 3 }
+    },
+    conditions: ["a>0", "b>0"]
   }
 ];
 
