@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examen ED</title>
+  <script>
+    window.MathJax = {
+      startup: {
+        ready: () => {
+          MathJax.startup.defaultReady();
+          console.log("MathJax listo");
+        }
+      },
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        renderActions: {
+          addMenu: [0, '', '']
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
+  <style>
+    .mathjax { color: #d63384; }
+    .MJX_Display, .MJXc-display { margin: 10px 0 !important; }
+    .param-info { font-size: 0.9em; color: #666; margin: 5px 0; }
+    .solution-steps { margin-top: 10px; padding: 10px; background: #f0f7ff; }
+  </style>
+</head>
+<body>
+  <div id="quiz-container"></div>
+  <script type="module">
+    import EDExamen from './js/main.js';
+    import config from './js/config/config1.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const examen = new EDExamen(config);
+      examen.init();
+    });
+  </script>
+</body>
+</html>
