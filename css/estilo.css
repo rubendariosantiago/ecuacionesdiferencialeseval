@@ -150,3 +150,39 @@
     max-width: 300px;
   }
 }
+
+.practicaOM-question {
+  border-left: 4px solid #9c27b0;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.options-container label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.options-container label:hover {
+  background: #eeeeee;
+}
+
+.options-container input[type="radio"] {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .options-container label {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
